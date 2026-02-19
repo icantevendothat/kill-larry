@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 // --- Floating Image Component ---
-const FloatingImage = ({ id, delay, initialPos, src }: { id: number, delay: number, initialPos: { top: string, left: string, rotate: string }, src: string }) => {
+const FloatingImage = ({ id, delay, initialPos, src }: { id: number, delay: number, initialPos: { top: string, left: string }, src: string }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [hoverTimer, setHoverTimer] = useState<NodeJS.Timeout | null>(null);
@@ -33,9 +33,9 @@ const FloatingImage = ({ id, delay, initialPos, src }: { id: number, delay: numb
       style={{ 
         top: initialPos.top, 
         left: initialPos.left,
-        transform: `rotate(${initialPos.rotate})` 
+        transform: `rotate(${initialPos})` // Adds the random tilt
       }}
-      className="fixed z-30 cursor-crosshair group"
+      className="fixed z-30 group"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -83,7 +83,9 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex flex-col h-screen justify-between font-sans font-bold overflow-hidden bg-black text-white relative">
+    <main className="flex flex-col h-screen justify-between font-sans font-bold overflow-hidden bg-black text-white relative" style={{ 
+      cursor: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><line x1='16' y1='0' x2='16' y2='32' stroke='red' stroke-width='2'/><line x1='0' y1='16' x2='32' y2='16' stroke='red' stroke-width='2'/></svg>") 16 16, crosshair` 
+    }}>
 
       {/* --- Cookie Info Modal --- */}
       {isModalOpen && (
