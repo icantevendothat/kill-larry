@@ -75,11 +75,15 @@ const LarryTarget = () => {
         let nextDirX = direction.x;
         let nextDirY = direction.y;
 
-        if (nextX <= 0 || nextX >= window.innerWidth - 48) {
+        // DYNAMIC BOUNDS: Ensures Larry respects the viewport on any device size
+        const maxX = typeof window !== 'undefined' ? window.innerWidth - 48 : 300;
+        const maxY = typeof window !== 'undefined' ? window.innerHeight - 180 : 500;
+
+        if (nextX <= 0 || nextX >= maxX) {
           nextDirX *= -1;
           setDirection((d) => ({ ...d, x: nextDirX }));
         }
-        if (nextY <= 80 || nextY >= window.innerHeight - 180) {
+        if (nextY <= 80 || nextY >= maxY) {
           nextDirY *= -1;
           setDirection((d) => ({ ...d, y: nextDirY }));
         }
@@ -105,6 +109,7 @@ const LarryTarget = () => {
             zIndex: 5,
             transform: `scaleX(${isFlipped ? -1 : 1})`,
             filter: 'invert(1)',
+            touchAction: 'none' // Prevents page jiggle on mobile tap
           }}
         >
           <img src="/killlarry.gif" alt="target" className="w-12 h-auto select-none" />
@@ -123,18 +128,16 @@ const FloatingImage = ({ id, delay, initialPos, src, startTimer }: { id: number;
   const [hasLoaded, setHasLoaded] = useState(false);
   const [hoverTimer, setHoverTimer] = useState<NodeJS.Timeout | null>(null);
 
-  // Initial load showing the images
   useEffect(() => {
     const showTimer = setTimeout(() => setHasLoaded(true), delay);
     return () => clearTimeout(showTimer);
   }, [delay]);
 
-  // The 3-second disappearing logic triggered by modal close
   useEffect(() => {
     if (startTimer) {
       const hideTimer = setTimeout(() => {
         setHasLoaded(false);
-      }, 3000 + delay); // 3 seconds + stagger
+      }, 3000 + delay);
       return () => clearTimeout(hideTimer);
     }
   }, [startTimer, delay]);
@@ -157,7 +160,7 @@ const FloatingImage = ({ id, delay, initialPos, src, startTimer }: { id: number;
       style={{ top: initialPos.top, left: initialPos.left }} 
       className="fixed z-[50] group pointer-events-auto"
     >
-      <div className="relative h-32 md:h-48 flex items-center justify-center min-w-[80px] md:min-w-[120px]">
+      <div className="relative h-24 md:h-48 flex items-center justify-center min-w-[80px] md:min-w-[120px]">
         <img 
           src={src} 
           alt={`Gallery ${id}`} 
@@ -168,28 +171,8 @@ const FloatingImage = ({ id, delay, initialPos, src, startTimer }: { id: number;
   );
 };
 
-const SlotLetter = ({ target, isSettled, delay }: { target: string; isSettled: boolean; delay: number }) => {
-  const characters = ["K", "I", "L", "L", "L", "A", "R", "R", "Y", "X", "Z", "!", "†"];
-  // Shuffle or repeat characters to create the "strip"
-  const strip = [target, ...characters, target];
-
-  return (
-    <span className="slot-container">
-      <span 
-        className={`slot-strip ${isSettled ? 'slot-snap' : ''}`}
-        style={{ animationDelay: `${delay}s`, transitionDelay: `${delay}s` }}
-      >
-        {strip.map((char, i) => (
-          <span key={i} className="block">{char}</span>
-        ))}
-      </span>
-    </span>
-  );
-};
-
 export default function Home() {
   const [activeStation, setActiveStation] = useState<number | null>(null);
-  // Modal is now TRUE by default for both desktop and mobile
   const [isModalOpen, setIsModalOpen] = useState(true); 
   const [modalHasBeenClosed, setModalHasBeenClosed] = useState(false);
   const [scatteredImages, setScatteredImages] = useState<{src: string; top: string; left: string}[]>([]);
@@ -229,30 +212,18 @@ export default function Home() {
 
       <LarryTarget />
 
-      {/* --- REVISED MODAL --- */}
+      {/* --- MODAL (Responsive p-4 and text sizes) --- */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 pointer-events-auto">
-          <div className="bg-[#EE83B5] border-2 border-red-600 p-8 max-w-md w-full relative">
-            <p className="text-red-600 text-sm font-normal uppercase tracking-tight leading-relaxed mb-8">
+          <div className="bg-[#EE83B5] border-2 border-red-600 p-6 md:p-8 max-w-md w-full relative">
+            <p className="text-red-600 text-[10px] md:text-sm font-normal uppercase tracking-tight leading-relaxed mb-8">
               THIS SITE USES COOKIES TO STORE SESSION DATA. NO DATA IS HARVESTED FOR LARRY.
             </p>
-            
             <div className="flex flex-col gap-3">
               <div className="flex gap-2">
-                <button 
-                  onClick={handleCloseModal} 
-                  className="flex-1 py-2 bg-[#EE83B5] text-red-600 border border-red-600 font-light uppercase hover:bg-zinc-900 transition-colors"
-                >
-                  AGREE
-                </button>
-                <button 
-                  onClick={handleCloseModal} 
-                  className="flex-1 py-2 bg-[#EE83B5] text-red-600 border border-red-600 font-light uppercase hover:bg-zinc-900 transition-colors"
-                >
-                  DISAGREE
-                </button>
+                <button onClick={handleCloseModal} className="flex-1 py-2 bg-[#EE83B5] text-red-600 border border-red-600 font-light uppercase hover:bg-zinc-900 transition-colors">AGREE</button>
+                <button onClick={handleCloseModal} className="flex-1 py-2 bg-[#EE83B5] text-red-600 border border-red-600 font-light uppercase hover:bg-zinc-900 transition-colors">DISAGREE</button>
               </div>
-
             </div>
           </div>
         </div>
@@ -269,21 +240,22 @@ export default function Home() {
         />
       ))}
 
+      {/* --- HEADER (Responsive vw adjustments) --- */}
       <div className="w-full flex flex-col justify-start absolute top-0 left-0 z-[40] pointer-events-none">
-        <h1 className="w-full flex justify-between items-start text-[19.5vw] leading-[0.5] uppercase transform scale-y-[4] origin-top select-none px-2 mt-[-2vw]">
+        <h1 className="w-full flex justify-between items-start text-[18vw] md:text-[19.5vw] leading-[0.5] uppercase transform scale-y-[4] origin-top select-none px-2 mt-[-2vw]">
           <span>K</span><span>I</span><span>L</span><span>L</span><span className="w-[10vw]"></span><span>L</span><span>A</span><span>R</span><span>R</span><span>Y</span>
         </h1>
-        <div className="px-3 mt-[42vw] md:mt-[16vw] md:text-right md:pr-11 z-50">
-          <p className="text-red-600 text-sm md:text-lg font-normal uppercase tracking-tight">ARTIST MANAGEMENT, ETC</p>
+        <div className="px-3 mt-[48vw] md:mt-[16vw] md:text-right md:pr-11 z-50">
+          <p className="text-red-600 text-xs md:text-lg font-normal uppercase tracking-tight">ARTIST MANAGEMENT, ETC</p>
         </div>
       </div>
 
       <div className="flex-grow"></div>
 
-      {/* --- MOBILE FOOTER --- */}
+      {/* --- MOBILE FOOTER (Kept as you had it, but ensured font sizes fit tiny screens) --- */}
       <div className="flex md:hidden flex-col w-full bg-[#EE83B5] p-4 z-[10] relative pointer-events-auto">
-         <div className="flex justify-end w-full mb-8">
-            <a href="mailto:contact@killlarry.com" className="text-red-600 text-sm font-normal uppercase">CONTACT</a>
+         <div className="flex justify-end w-full mb-6">
+            <a href="mailto:contact@killlarry.com" className="text-red-600 text-xs font-normal uppercase">CONTACT</a>
          </div>
          <div className="flex flex-col gap-2 w-full">
             {[1, 2].map((num) => (
@@ -293,13 +265,13 @@ export default function Home() {
                 className={`w-full h-12 bg-black flex items-center justify-between px-4 border border-red-600 transition-all ${activeStation === num ? 'ring-2 ring-red-600' : ''}`}
                >
                   <span className="text-red-600 font-bold">{num}</span>
-                  <span className="text-red-600 font-normal uppercase">{stations[num].name}</span>
+                  <span className="text-red-600 font-normal uppercase text-xs">{stations[num].name}</span>
                </button>
             ))}
          </div>
       </div>
 
-      {/* --- DESKTOP FOOTER --- */}
+      {/* --- DESKTOP FOOTER (UNTOUCHED) --- */}
       <div className="hidden md:flex w-full bg-[#EE83B5] border-b-[4px] border-red-600 pt-40 pb-4 px-10 z-[10] relative items-end pointer-events-auto">
         <div className="w-full flex flex-row items-end justify-between pb-0">
           <div className="flex flex-row items-end mb-0 gap-4 pb-1">
@@ -330,8 +302,6 @@ export default function Home() {
               >
                 i
             </button>
-            </div>
-            <div className="flex gap-3 text-red-600 text-[12px] leading-tight uppercase underline tracking-tight">
             </div>
           </div>
           <a href="mailto:contact@killlarry.com" className="text-red-600 text-lg font-normal uppercase tracking-normal hover:text-red-800 transition-colors mb-0 pb-1">Contact</a>
