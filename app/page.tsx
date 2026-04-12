@@ -444,7 +444,7 @@ return (
 
       <div className="flex flex-col gap-3">
         <a 
-          href="https://open.spotify.com/artist/jaswiry" 
+          href="https://open.spotify.com/artist/1fGZCYZpR1kUczhB55AJaW" 
           target="_blank" 
           rel="noopener noreferrer"
           onClick={handleCloseModal}
@@ -454,7 +454,7 @@ return (
         </a>
 
         <a 
-          href="https://open.spotify.com/artist/hawa" 
+          href="https://open.spotify.com/artist/2YwiHXMC3iIiXZEQZ5PUJG" 
           target="_blank" 
           rel="noopener noreferrer" 
           onClick={handleCloseModal}
