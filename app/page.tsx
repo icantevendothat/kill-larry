@@ -1,312 +1,630 @@
 "use client";
 
+
+
 import { useState, useEffect, useRef } from 'react';
 
+
+
 // --- Particle Component ---
+
 const Particle = ({ x, y, color }: { x: number; y: number; color: string }) => {
-  const [pos, setPos] = useState({ x, y });
-  const [isDead, setIsDead] = useState(false);
-  const velocity = useRef({
-    x: (Math.random() - 0.5) * 14,
-    y: (Math.random() - 0.5) * 14,
-  });
-  const lifeSpan = useRef(0);
-  const maxLife = 40 + Math.random() * 30;
 
-  useEffect(() => {
-    if (isDead) return;
-    const timer = setInterval(() => {
-      lifeSpan.current += 1;
-      setPos((prev) => ({
-        x: prev.x + velocity.current.x,
-        y: prev.y + velocity.current.y + (lifeSpan.current * 0.05),
-      }));
-      if (lifeSpan.current > maxLife) {
-        setIsDead(true);
-        clearInterval(timer);
-      }
-    }, 16);
-    return () => clearInterval(timer);
-  }, [isDead]);
+const [pos, setPos] = useState({ x, y });
 
-  return (
-    <div
-      style={{
-        left: pos.x,
-        top: pos.y,
-        backgroundColor: color,
-        width: '3px',
-        height: '3px',
-        position: 'fixed',
-        zIndex: 41, 
-        pointerEvents: 'none',
-      }}
-    />
-  );
+const [isDead, setIsDead] = useState(false);
+
+const velocity = useRef({
+
+x: (Math.random() - 0.5) * 14,
+
+y: (Math.random() - 0.5) * 14,
+
+});
+
+const lifeSpan = useRef(0);
+
+const maxLife = 40 + Math.random() * 30;
+
+
+
+useEffect(() => {
+
+if (isDead) return;
+
+const timer = setInterval(() => {
+
+lifeSpan.current += 1;
+
+setPos((prev) => ({
+
+x: prev.x + velocity.current.x,
+
+y: prev.y + velocity.current.y + (lifeSpan.current * 0.05),
+
+}));
+
+if (lifeSpan.current > maxLife) {
+
+setIsDead(true);
+
+clearInterval(timer);
+
+}
+
+}, 16);
+
+return () => clearInterval(timer);
+
+}, [isDead]);
+
+
+
+return (
+
+<div
+
+style={{
+
+left: pos.x,
+
+top: pos.y,
+
+backgroundColor: color,
+
+width: '3px',
+
+height: '3px',
+
+position: 'fixed',
+
+zIndex: 41,
+
+pointerEvents: 'none',
+
+}}
+
+/>
+
+);
+
 };
+
+
 
 // --- Larry Enemy Component ---
+
 const LarryTarget = () => {
-  const [pos, setPos] = useState({ x: 50, y: 150 }); 
-  const [isKilled, setIsKilled] = useState(false);
-  const [allParticles, setAllParticles] = useState<{ id: number; x: number; y: number }[]>([]);
-  const [direction, setDirection] = useState({ x: 1.5, y: 1.0 });
-  const [isFlipped, setIsFlipped] = useState(false);
-  const requestRef = useRef<number | null>(null);
 
-  const handleKill = (e: React.MouseEvent | React.TouchEvent) => {
-    e.stopPropagation();
-    if (isKilled) return;
-    setIsKilled(true);
-    const newParticles = Array.from({ length: 40 }).map((_, i) => ({
-      id: Date.now() + i,
-      x: pos.x + 24, 
-      y: pos.y + 24,
-    }));
-    setAllParticles(prev => [...prev, ...newParticles]);
-  };
+const [pos, setPos] = useState({ x: 50, y: 150 });
 
-  useEffect(() => {
-    if (isKilled) return;
-    const animate = () => {
-      setPos((prev) => {
-        let nextX = prev.x + direction.x;
-        let nextY = prev.y + direction.y;
-        let nextDirX = direction.x;
-        let nextDirY = direction.y;
+const [isKilled, setIsKilled] = useState(false);
 
-        // DYNAMIC BOUNDS: Ensures Larry respects the viewport on any device size
-        const maxX = typeof window !== 'undefined' ? window.innerWidth - 48 : 300;
-        const maxY = typeof window !== 'undefined' ? window.innerHeight - 180 : 500;
+const [allParticles, setAllParticles] = useState<{ id: number; x: number; y: number }[]>([]);
 
-        if (nextX <= 0 || nextX >= maxX) {
-          nextDirX *= -1;
-          setDirection((d) => ({ ...d, x: nextDirX }));
-        }
-        if (nextY <= 80 || nextY >= maxY) {
-          nextDirY *= -1;
-          setDirection((d) => ({ ...d, y: nextDirY }));
-        }
-        setIsFlipped(nextDirX > 0);
-        return { x: nextX, y: nextY };
-      });
-      requestRef.current = requestAnimationFrame(animate);
-    };
-    requestRef.current = requestAnimationFrame(animate);
-    return () => { if (requestRef.current) cancelAnimationFrame(requestRef.current); };
-  }, [direction, isKilled]);
+const [direction, setDirection] = useState({ x: 1.5, y: 1.0 });
 
-  return (
-    <>
-      {!isKilled && (
-        <div
-          onClick={handleKill}
-          onTouchStart={handleKill}
-          style={{
-            left: pos.x,
-            top: pos.y,
-            position: 'fixed',
-            zIndex: 5,
-            transform: `scaleX(${isFlipped ? -1 : 1})`,
-            filter: 'invert(1)',
-            touchAction: 'none' // Prevents page jiggle on mobile tap
-          }}
-        >
-          <img src="/killlarry.gif" alt="target" className="w-12 h-auto select-none" />
-        </div>
-      )}
-      {allParticles.map((p) => (
-        <Particle key={p.id} x={p.x} y={p.y} color="#FF0000" />
-      ))}
-    </>
-  );
+const [isFlipped, setIsFlipped] = useState(false);
+
+const requestRef = useRef<number | null>(null);
+
+
+
+const handleKill = (e: React.MouseEvent | React.TouchEvent) => {
+
+e.stopPropagation();
+
+if (isKilled) return;
+
+setIsKilled(true);
+
+const newParticles = Array.from({ length: 40 }).map((_, i) => ({
+
+id: Date.now() + i,
+
+x: pos.x + 24,
+
+y: pos.y + 24,
+
+}));
+
+setAllParticles(prev => [...prev, ...newParticles]);
+
 };
+
+
+
+useEffect(() => {
+
+if (isKilled) return;
+
+const animate = () => {
+
+setPos((prev) => {
+
+let nextX = prev.x + direction.x;
+
+let nextY = prev.y + direction.y;
+
+let nextDirX = direction.x;
+
+let nextDirY = direction.y;
+
+
+
+// DYNAMIC BOUNDS: Ensures Larry respects the viewport on any device size
+
+const maxX = typeof window !== 'undefined' ? window.innerWidth - 48 : 300;
+
+const maxY = typeof window !== 'undefined' ? window.innerHeight - 180 : 500;
+
+
+
+if (nextX <= 0 || nextX >= maxX) {
+
+nextDirX *= -1;
+
+setDirection((d) => ({ ...d, x: nextDirX }));
+
+}
+
+if (nextY <= 80 || nextY >= maxY) {
+
+nextDirY *= -1;
+
+setDirection((d) => ({ ...d, y: nextDirY }));
+
+}
+
+setIsFlipped(nextDirX > 0);
+
+return { x: nextX, y: nextY };
+
+});
+
+requestRef.current = requestAnimationFrame(animate);
+
+};
+
+requestRef.current = requestAnimationFrame(animate);
+
+return () => { if (requestRef.current) cancelAnimationFrame(requestRef.current); };
+
+}, [direction, isKilled]);
+
+
+
+return (
+
+<>
+
+{!isKilled && (
+
+<div
+
+onClick={handleKill}
+
+onTouchStart={handleKill}
+
+style={{
+
+left: pos.x,
+
+top: pos.y,
+
+position: 'fixed',
+
+zIndex: 5,
+
+transform: `scaleX(${isFlipped ? -1 : 1})`,
+
+filter: 'invert(1)',
+
+touchAction: 'none' // Prevents page jiggle on mobile tap
+
+}}
+
+>
+
+<img src="/killlarry.gif" alt="target" className="w-12 h-auto select-none" />
+
+</div>
+
+)}
+
+{allParticles.map((p) => (
+
+<Particle key={p.id} x={p.x} y={p.y} color="#FF0000" />
+
+))}
+
+</>
+
+);
+
+};
+
+
 
 // --- Floating Image Component ---
+
 const FloatingImage = ({ id, delay, initialPos, src, startTimer }: { id: number; delay: number; initialPos: { top: string; left: string }; src: string; startTimer: boolean }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const [hasLoaded, setHasLoaded] = useState(false);
-  const [hoverTimer, setHoverTimer] = useState<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    const showTimer = setTimeout(() => setHasLoaded(true), delay);
-    return () => clearTimeout(showTimer);
-  }, [delay]);
+const [isVisible, setIsVisible] = useState(false);
 
-  useEffect(() => {
-    if (startTimer) {
-      const hideTimer = setTimeout(() => {
-        setHasLoaded(false);
-      }, 3000 + delay);
-      return () => clearTimeout(hideTimer);
-    }
-  }, [startTimer, delay]);
+const [hasLoaded, setHasLoaded] = useState(false);
 
-  const handleMouseEnter = () => {
-    if (hoverTimer) clearTimeout(hoverTimer);
-    setIsVisible(true);
+const [hoverTimer, setHoverTimer] = useState<NodeJS.Timeout | null>(null);
+
+
+
+useEffect(() => {
+
+const showTimer = setTimeout(() => setHasLoaded(true), delay);
+
+return () => clearTimeout(showTimer);
+
+}, [delay]);
+
+
+
+useEffect(() => {
+  // 1. Show the image after its initial staggered delay
+  const showTimer = setTimeout(() => setHasLoaded(true), delay);
+
+  // 2. Hide the image 3 seconds after the page opens
+  const hideTimer = setTimeout(() => {
+    setHasLoaded(false);
+  }, 3000); 
+
+  return () => {
+    clearTimeout(showTimer);
+    clearTimeout(hideTimer);
   };
+}, [delay]);
 
-  const handleMouseLeave = () => {
-    const timer = setTimeout(() => setIsVisible(false), 1000);
-    setHoverTimer(timer);
-  };
 
-  return (
-    <div 
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onClick={() => setIsVisible(!isVisible)}
-      style={{ top: initialPos.top, left: initialPos.left }} 
-      className="fixed z-[50] group pointer-events-auto"
-    >
-      <div className="relative h-24 md:h-48 flex items-center justify-center min-w-[80px] md:min-w-[120px]">
-        <img 
-          src={src} 
-          alt={`Gallery ${id}`} 
-          className={`h-full w-auto object-contain shadow-2xl transition-all duration-300 ease-out transform ${hasLoaded || isVisible ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`} 
-        />
-      </div>
-    </div>
-  );
+
+const handleMouseEnter = () => {
+
+if (hoverTimer) clearTimeout(hoverTimer);
+
+setIsVisible(true);
+
 };
 
+
+
+const handleMouseLeave = () => {
+
+const timer = setTimeout(() => setIsVisible(false), 1000);
+
+setHoverTimer(timer);
+
+};
+
+
+
+return (
+
+<div
+
+onMouseEnter={handleMouseEnter}
+
+onMouseLeave={handleMouseLeave}
+
+onClick={() => setIsVisible(!isVisible)}
+
+style={{ top: initialPos.top, left: initialPos.left }}
+
+className="fixed z-[50] group pointer-events-auto"
+
+>
+
+<div className="relative h-24 md:h-48 flex items-center justify-center min-w-[80px] md:min-w-[120px]">
+
+<img
+
+src={src}
+
+alt={`Gallery ${id}`}
+
+className={`h-full w-auto object-contain shadow-2xl transition-all duration-300 ease-out transform ${hasLoaded || isVisible ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`}
+
+/>
+
+</div>
+
+</div>
+
+);
+
+};
+
+
+
 export default function Home() {
-  const [activeStation, setActiveStation] = useState<number | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(true); 
-  const [modalHasBeenClosed, setModalHasBeenClosed] = useState(false);
-  const [scatteredImages, setScatteredImages] = useState<{src: string; top: string; left: string}[]>([]);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const stations: Record<number, { name: string; url: string }> = {
-    1: { name: "JASWIRY", url: "/audio/jaswiry.mp3" },
-    2: { name: "HAWA", url: "/audio/hawa.mp3" }
-  };
+const [activeStation, setActiveStation] = useState<number | null>(null);
 
-  useEffect(() => {
-    const imageNames = ['Screenshot 2026-01-30 at 11.01.03 PM 1.png', 'draft2 1.png', 'Screenshot 2026-01-30 at 11.21.41 PM 1.png', 'Screenshot 2026-01-30 at 11.24.15 PM 1 1.png', 'Screenshot 2026-01-30 at 11.25.07 PM 1.png', 'Screenshot 2026-01-30 at 11.25.20 PM 1.png', 'Screenshot 2026-01-30 at 11.26.55 PM 1.png', 'Screenshot 2026-01-30 at 11.30.17 PM 1.png', 'Screenshot 2026-01-30 at 11.31.09 PM 1.png'];
-    setScatteredImages(imageNames.map(name => ({
-      src: `/gallery/${name}`,
-      top: `${Math.random() * 50 + 15}%`, 
-      left: `${Math.random() * 50 + 10}%`, 
-    })));
-  }, []);
+const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
-    if (activeStation !== null) {
-      audioRef.current = new Audio(stations[activeStation].url);
-      audioRef.current.loop = true;
-      audioRef.current.play().catch(() => {});
-    }
-    return () => audioRef.current?.pause();
-  }, [activeStation]);
+const [modalHasBeenClosed, setModalHasBeenClosed] = useState(false);
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setModalHasBeenClosed(true);
-  };
+const [scatteredImages, setScatteredImages] = useState<{src: string; top: string; left: string}[]>([]);
 
-  return (
-    <main className="flex flex-col h-screen justify-between font-sans font-bold overflow-hidden bg-black text-white relative" style={{ cursor: 'url("/larry.cur"), auto' }}>
+const audioRef = useRef<HTMLAudioElement | null>(null);
 
-      <LarryTarget />
 
-      {/* --- MODAL (Responsive p-4 and text sizes) --- */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 pointer-events-auto">
-          <div className="bg-[#EE83B5] border-2 border-red-600 p-6 md:p-8 max-w-md w-full relative">
-            <p className="text-red-600 text-[10px] md:text-sm font-normal uppercase tracking-tight leading-relaxed mb-8">
-              THIS SITE USES COOKIES TO STORE SESSION DATA. NO DATA IS HARVESTED FOR LARRY.
-            </p>
-            <div className="flex flex-col gap-3">
-              <div className="flex gap-2">
-                <button onClick={handleCloseModal} className="flex-1 py-2 bg-[#EE83B5] text-red-600 border border-red-600 font-light uppercase hover:bg-zinc-900 transition-colors">AGREE</button>
-                <button onClick={handleCloseModal} className="flex-1 py-2 bg-[#EE83B5] text-red-600 border border-red-600 font-light uppercase hover:bg-zinc-900 transition-colors">DISAGREE</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {scatteredImages.map((img, index) => (
-        <FloatingImage 
-          key={index} 
-          id={index + 1} 
-          initialPos={{ top: img.top, left: img.left }} 
-          src={img.src} 
-          delay={index * 50} 
-          startTimer={modalHasBeenClosed}
-        />
-      ))}
+const stations: Record<number, { name: string; url: string }> = {
 
-      {/* --- HEADER (Responsive vw adjustments) --- */}
-      <div className="w-full flex flex-col justify-start absolute top-0 left-0 z-[40] pointer-events-none">
-        <h1 className="w-full flex justify-between items-start text-[18vw] md:text-[19.5vw] leading-[0.5] uppercase transform scale-y-[4] origin-top select-none px-2 mt-[-2vw]">
-          <span>K</span><span>I</span><span>L</span><span>L</span><span className="w-[10vw]"></span><span>L</span><span>A</span><span>R</span><span>R</span><span>Y</span>
-        </h1>
-        <div className="px-3 mt-[48vw] md:mt-[16vw] md:text-right md:pr-11 z-50">
-          <p className="text-red-600 text-xs md:text-lg font-normal uppercase tracking-tight">ARTIST MANAGEMENT, ETC</p>
-        </div>
+1: { name: "JASWIRY", url: "/audio/jaswiry.mp3" },
+
+2: { name: "HAWA", url: "/audio/hawa.mp3" }
+
+};
+
+
+
+useEffect(() => {
+
+const imageNames = ['Screenshot 2026-01-30 at 11.01.03 PM 1.png', 'draft2 1.png', 'Screenshot 2026-01-30 at 11.21.41 PM 1.png', 'Screenshot 2026-01-30 at 11.24.15 PM 1 1.png', 'Screenshot 2026-01-30 at 11.25.07 PM 1.png', 'Screenshot 2026-01-30 at 11.25.20 PM 1.png', 'Screenshot 2026-01-30 at 11.26.55 PM 1.png', 'Screenshot 2026-01-30 at 11.30.17 PM 1.png', 'Screenshot 2026-01-30 at 11.31.09 PM 1.png'];
+
+setScatteredImages(imageNames.map(name => ({
+
+src: `/gallery/${name}`,
+
+top: `${Math.random() * 50 + 15}%`,
+
+left: `${Math.random() * 50 + 10}%`,
+
+})));
+
+}, []);
+
+
+
+useEffect(() => {
+
+if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+
+if (activeStation !== null) {
+
+audioRef.current = new Audio(stations[activeStation].url);
+
+audioRef.current.loop = true;
+
+audioRef.current.play().catch(() => {});
+
+}
+
+return () => audioRef.current?.pause();
+
+}, [activeStation]);
+
+
+
+const handleCloseModal = () => {
+
+setIsModalOpen(false);
+
+setModalHasBeenClosed(true);
+
+};
+
+
+
+return (
+
+<main className="flex flex-col h-screen justify-between font-sans font-bold overflow-hidden bg-black text-white relative" style={{ cursor: 'url("/larry.cur"), auto' }}>
+
+
+
+<LarryTarget />
+
+
+
+{isModalOpen && (
+  /* Increased z-index to 999 and ensured pointer-events-auto is active */
+  <div className="fixed inset-0 z-999 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 pointer-events-auto">
+    
+    <div className="bg-[#EE83B5] border-2 border-red-600 p-6 md:p-8 max-w-md w-full relative">
+      <p className="text-red-600 text-[10px] md:text-sm font-normal uppercase tracking-tight leading-relaxed mb-8">
+        STREAM KILL LARRY ARTISTS BELOW:
+      </p>
+
+      <button 
+        onClick={handleCloseModal}
+        className="absolute top-2 right-2 text-red-600 hover:text-zinc-900 transition-colors p-2 text-xl leading-none font-bold"
+        aria-label="Close modal"
+      >
+        ✕
+      </button>
+
+      <div className="flex flex-col gap-3">
+        <a 
+          href="https://open.spotify.com/artist/jaswiry" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          onClick={handleCloseModal}
+          className="w-full py-2 bg-[#EE83B5] text-red-600 border border-red-600 font-light uppercase hover:bg-zinc-900 transition-colors text-center cursor-pointer"
+        >
+          JASWIRY
+        </a>
+
+        <a 
+          href="https://open.spotify.com/artist/hawa" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          onClick={handleCloseModal}
+          className="w-full py-2 bg-[#EE83B5] text-red-600 border border-red-600 font-light uppercase hover:bg-zinc-900 transition-colors text-center cursor-pointer"
+        >
+          HAWA
+        </a>
       </div>
+    </div>
+  </div>
+)}
 
-      <div className="flex-grow"></div>
+{scatteredImages.map((img, index) => (
 
-      {/* --- MOBILE FOOTER (Kept as you had it, but ensured font sizes fit tiny screens) --- */}
-      <div className="flex md:hidden flex-col w-full bg-[#EE83B5] p-4 z-[10] relative pointer-events-auto">
-         <div className="flex justify-end w-full mb-6">
-            <a href="mailto:contact@killlarry.com" className="text-red-600 text-xs font-normal uppercase">CONTACT</a>
-         </div>
-         <div className="flex flex-col gap-2 w-full">
-            {[1, 2].map((num) => (
-               <button 
-                key={num} 
-                onClick={() => setActiveStation(prev => (prev === num ? null : num))}
-                className={`w-full h-12 bg-black flex items-center justify-between px-4 border border-red-600 transition-all ${activeStation === num ? 'ring-2 ring-red-600' : ''}`}
-               >
-                  <span className="text-red-600 font-bold">{num}</span>
-                  <span className="text-red-600 font-normal uppercase text-xs">{stations[num].name}</span>
-               </button>
-            ))}
-         </div>
-      </div>
+<FloatingImage
 
-      {/* --- DESKTOP FOOTER (UNTOUCHED) --- */}
-      <div className="hidden md:flex w-full bg-[#EE83B5] border-b-[4px] border-red-600 pt-40 pb-4 px-10 z-[10] relative items-end pointer-events-auto">
-        <div className="w-full flex flex-row items-end justify-between pb-0">
-          <div className="flex flex-row items-end mb-0 gap-4 pb-1">
-            <div className="flex gap-2">
-              {[1, 2].map((num) => (
-                <button key={num} onClick={() => setActiveStation(prev => (prev === num ? null : num))} className={`w-12 h-12 bg-black flex items-center justify-center transition-all group ${activeStation === num ? 'border-[4px] border-red-600' : 'border border-red-600 hover:bg-zinc-900'}`}>
-                  <span className="text-red-600 font-bold text-lg">{num}</span>
-                </button>
-              ))}
-            </div>
-            <div className="flex flex-col leading-none mb-1">
-                <span className="text-red-600 text-[10px] font-bold uppercase tracking-tight leading-none mb-1">
-                  {activeStation ? "NOW PLAYING" : ""}
-                </span>
-                <span className="text-red-600 text-lg font-normal uppercase tracking-normal leading-none">
-                  {activeStation ? stations[activeStation].name : "LISTEN HERE"}
-                </span>
-            </div>
-          </div>
-          <div className="bg-black px-4 py-2 border border-red-600 mx-4 w-[550px] flex items-center justify-between mb-0">
-        <div className="flex items-center gap-3 w-full justify-between">
-          <div className="flex items-center gap-2">
-            <p className="text-red-600 text-sm font-normal uppercase tracking-tight">
-              THIS SITE COLLECTS COOKIES.
-            </p> 
-            </div>
-            <button onClick={() => setIsModalOpen(true)} className="w-4 h-4 rounded-full border border-red-600 text-red-600 text-[10px] flex items-center justify-center hover:bg-red-600 hover:text-black transition-all font-bold flex-shrink-0"
-              >
-                i
-            </button>
-            </div>
-          </div>
-          <a href="mailto:contact@killlarry.com" className="text-red-600 text-lg font-normal uppercase tracking-normal hover:text-red-800 transition-colors mb-0 pb-1">Contact</a>
-        </div>
-      </div>
-    </main>
-  );
+key={index}
+
+id={index + 1}
+
+initialPos={{ top: img.top, left: img.left }}
+
+src={img.src}
+
+delay={index * 50}
+
+startTimer={modalHasBeenClosed}
+
+/>
+
+))}
+
+
+
+{/* --- HEADER (Responsive vw adjustments) --- */}
+
+<div className="w-full flex flex-col justify-start absolute top-0 left-0 z-[40] pointer-events-none">
+
+<h1 className="w-full flex justify-between items-start text-[18vw] md:text-[19.5vw] leading-[0.5] uppercase transform scale-y-[4] origin-top select-none px-2 mt-[-2vw]">
+
+<span>K</span><span>I</span><span>L</span><span>L</span><span className="w-[10vw]"></span><span>L</span><span>A</span><span>R</span><span>R</span><span>Y</span>
+
+</h1>
+
+<div className="px-3 mt-[48vw] md:mt-[16vw] md:text-right md:pr-11 z-50">
+
+<p className="text-red-600 text-xs md:text-lg font-normal uppercase tracking-tight">ARTIST MANAGEMENT, ETC</p>
+
+</div>
+
+</div>
+
+
+
+<div className="flex-grow"></div>
+
+
+
+{/* --- MOBILE FOOTER (Kept as you had it, but ensured font sizes fit tiny screens) --- */}
+
+<div className="flex md:hidden flex-col w-full bg-[#EE83B5] p-4 z-[10] relative pointer-events-auto">
+
+<div className="flex justify-end w-full mb-6">
+
+<a href="mailto:info@killlarry.com" className="text-red-600 text-xs font-normal uppercase">CONTACT</a>
+
+</div>
+
+<div className="flex flex-col gap-2 w-full">
+
+{[1, 2].map((num) => (
+
+<button
+
+key={num}
+
+onClick={() => setActiveStation(prev => (prev === num ? null : num))}
+
+className={`w-full h-12 bg-black flex items-center justify-between px-4 border border-red-600 transition-all ${activeStation === num ? 'ring-2 ring-red-600' : ''}`}
+
+>
+
+<span className="text-red-600 font-bold">{num}</span>
+
+<span className="text-red-600 font-normal uppercase text-xs">{stations[num].name}</span>
+
+</button>
+
+))}
+
+</div>
+
+</div>
+
+
+
+{/* --- DESKTOP FOOTER (UNTOUCHED) --- */}
+
+<div className="hidden md:flex w-full bg-[#EE83B5] border-b-[4px] border-red-600 pt-40 pb-4 px-10 z-[10] relative items-end pointer-events-auto">
+
+<div className="w-full flex flex-row items-end justify-between pb-0">
+
+<div className="flex flex-row items-end mb-0 gap-4 pb-1">
+
+<div className="flex gap-2">
+
+{[1, 2].map((num) => (
+
+<button key={num} onClick={() => setActiveStation(prev => (prev === num ? null : num))} className={`w-12 h-12 bg-black flex items-center justify-center transition-all group ${activeStation === num ? 'border-[4px] border-red-600' : 'border border-red-600 hover:bg-zinc-900'}`}>
+
+<span className="text-red-600 font-bold text-lg">{num}</span>
+
+</button>
+
+))}
+
+</div>
+
+<div className="flex flex-col leading-none mb-1">
+
+<span className="text-red-600 text-[10px] font-bold uppercase tracking-tight leading-none mb-1">
+
+{activeStation ? "NOW PLAYING" : ""}
+
+</span>
+
+<span className="text-red-600 text-lg font-normal uppercase tracking-normal leading-none">
+
+{activeStation ? stations[activeStation].name : "LISTEN HERE"}
+
+</span>
+
+</div>
+
+</div>
+
+<div className="bg-black px-4 py-2 border border-red-600 mx-4 w-[550px] flex items-center justify-between mb-0">
+
+<div className="flex items-center gap-3 w-full justify-between">
+
+<div className="flex items-center gap-2">
+
+<p className="text-red-600 text-sm font-normal uppercase tracking-tight">
+
+STREAM KILL LARRY ARTISTS
+
+</p>
+
+</div>
+
+<button onClick={() => setIsModalOpen(true)} className="w-4 h-4 rounded-full border border-red-600 text-red-600 text-[10px] flex items-center justify-center hover:bg-red-600 hover:text-black transition-all font-bold flex-shrink-0"
+
+>
+
++
+
+</button>
+
+</div>
+
+</div>
+
+<a href="mailto:info@killlarry.com" className="text-red-600 text-lg font-normal uppercase tracking-normal hover:text-red-800 transition-colors mb-0 pb-1">Contact</a>
+
+</div>
+
+</div>
+
+</main>
+
+);
+
 }
