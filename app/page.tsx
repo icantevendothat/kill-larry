@@ -152,8 +152,6 @@ let nextDirY = direction.y;
 
 
 
-// DYNAMIC BOUNDS: Ensures Larry respects the viewport on any device size
-
 const maxX = typeof window !== 'undefined' ? window.innerWidth - 48 : 300;
 
 const maxY = typeof window !== 'undefined' ? window.innerHeight - 180 : 500;
@@ -246,7 +244,6 @@ touchAction: 'none' // Prevents page jiggle on mobile tap
 
 
 
-// --- Floating Image Component ---
 
 const FloatingImage = ({ id, delay, initialPos, src, startTimer }: { id: number; delay: number; initialPos: { top: string; left: string }; src: string; startTimer: boolean }) => {
 
@@ -426,7 +423,6 @@ return (
 
 
 {isModalOpen && (
-  /* Increased z-index to 999 and ensured pointer-events-auto is active */
   <div className="fixed inset-0 z-999 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 pointer-events-auto">
     
     <div className="bg-[#EE83B5] border-2 border-red-600 p-6 md:p-8 max-w-md w-full relative">
@@ -454,7 +450,7 @@ return (
         </a>
 
         <a 
-          href="https://open.spotify.com/artist/2YwiHXMC3iIiXZEQZ5PUJG" 
+          href="https://ffm.bio/hawa" 
           target="_blank" 
           rel="noopener noreferrer" 
           onClick={handleCloseModal}
@@ -489,7 +485,6 @@ startTimer={modalHasBeenClosed}
 
 
 
-{/* --- HEADER (Responsive vw adjustments) --- */}
 
 <div className="w-full flex flex-col justify-start absolute top-0 left-0 z-[40] pointer-events-none">
 
@@ -513,13 +508,12 @@ startTimer={modalHasBeenClosed}
 
 
 
-{/* --- MOBILE FOOTER (Kept as you had it, but ensured font sizes fit tiny screens) --- */}
 
 <div className="flex md:hidden flex-col w-full bg-[#EE83B5] p-4 z-[10] relative pointer-events-auto">
 
 <div className="flex justify-end w-full mb-6">
 
-<a href="mailto:info@killlarry.com" className="text-red-600 text-xs font-normal uppercase">CONTACT</a>
+<a href="mailto:info@kill-larry.com" className="text-red-600 text-xs font-normal uppercase">CONTACT</a>
 
 </div>
 
@@ -550,8 +544,6 @@ className={`w-full h-12 bg-black flex items-center justify-between px-4 border b
 </div>
 
 
-
-{/* --- DESKTOP FOOTER (UNTOUCHED) --- */}
 
 <div className="hidden md:flex w-full bg-[#EE83B5] border-b-[4px] border-red-600 pt-40 pb-4 px-10 z-[10] relative items-end pointer-events-auto">
 

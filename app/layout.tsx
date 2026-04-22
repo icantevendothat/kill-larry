@@ -17,7 +17,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="h-full">
-      {/* Set global background to black and text to white */}
       <body className={`${inter.className} bg-black text-white h-full m-0`}>
         {children}
       </body>
