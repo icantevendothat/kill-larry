@@ -609,7 +609,7 @@ STREAM KILL LARRY ARTISTS
 
 </div>
 
-<a href="mailto:info@killlarry.com" className="text-red-600 text-lg font-normal uppercase tracking-normal hover:text-red-800 transition-colors mb-0 pb-1">Contact</a>
+<a href="mailto:info@kill-larry.com" className="text-red-600 text-lg font-normal uppercase tracking-normal hover:text-red-800 transition-colors mb-0 pb-1">Contact</a>
 
 </div>
 
