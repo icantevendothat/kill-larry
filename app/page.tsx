@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 
+// --- Particle Component ---
 const Particle = ({ x, y, color }: { x: number; y: number; color: string }) => {
   const [pos, setPos] = useState({ x, y });
   const [isDead, setIsDead] = useState(false);
@@ -44,6 +45,7 @@ const Particle = ({ x, y, color }: { x: number; y: number; color: string }) => {
   );
 };
 
+// --- Larry Enemy Component ---
 const LarryTarget = () => {
   const [pos, setPos] = useState({ x: 50, y: 150 });
   const [isKilled, setIsKilled] = useState(false);
@@ -176,8 +178,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const imageNames = ['Screenshot 2026-01-30 at 11.01.03 PM 1.png', 'draft2 1.png', 'Screenshot 2026-01-30 at 11.21.41 PM 1.png', 'Screenshot 2026-01-30 at 11.24.15 PM 1 1.png', 'Screenshot 2026-01-30 at 11.25.07 PM 1.png', 'Screenshot 2026-01-30 at 11.25.20 PM 1.png', 'Screenshot 2026-01-30 at 11.26.55 PM 1.png', 'Screenshot 2026-01-30 at 11.30.17 PM 1.png', 'Screenshot 2026-01-30 at 11.31.09 PM 1.png'];
-    setScatteredImages(imageNames.map(name => ({
+    const imageNames = ['Screenshot 2026-01-30 at 11.01.03 PM 1.png', 'draft2 1.png', 'Screenshot 2026-01-30 at 11.21.41 PM 1.png', 'Screenshot 2026-01-30 at 11.24.15 PM 1 1.png', 'Screenshot 2026-01-30 at 11.25.07 PM 1.png', 'Screenshot 2026-01-30 at 11.25.20 PM 1.png', 'Screenshot 2026-01-30 at 11.26.55 PM 1.png', 'Screenshot 2026-01-30 at 11.30.17 PM 1.png', 'Screenshot 2026-01-30 at 11.31.09 PM 1.png'];    setScatteredImages(imageNames.map(name => ({
       src: `/gallery/${name}`,
       top: `${Math.random() * 50 + 15}%`,
       left: `${Math.random() * 50 + 10}%`,
@@ -219,7 +220,7 @@ export default function Home() {
   };
 
   return (
-    <main className="flex flex-col h-screen justify-between font-sans font-bold overflow-hidden bg-black text-white relative" style={{ cursor: 'url("/larry.cur"), auto' }}>
+    <main className="flex flex-col h-[100dvh] justify-between font-sans font-bold overflow-hidden bg-black text-white relative" style={{ cursor: 'url("/larry.cur"), auto' }}>
 
       <LarryTarget />
 
@@ -261,7 +262,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* scattereds */}
+      {/* Scattered gallery images */}
       {scatteredImages.map((img, index) => (
         <FloatingImage
           key={index}
@@ -273,13 +274,13 @@ export default function Home() {
         />
       ))}
 
-      {/* title + mobile stream button */}
+      {/* Title + mobile stream button */}
       <div className="w-full flex flex-col justify-start absolute top-0 left-0 z-[40] pointer-events-none px-2">
         <h1 className="w-full flex justify-between items-start text-[18vw] md:text-[19.5vw] leading-[0.5] uppercase transform scale-y-[3.5] md:scale-y-[4] origin-top select-none mt-[-1vw] md:mt-[-2vw]">
           <span>K</span><span>I</span><span>L</span><span>L</span><span className="w-[10vw]"></span><span>L</span><span>A</span><span>R</span><span>R</span><span>Y</span>
         </h1>
 
-        {/* mobile:stream button */}
+        {/* Mobile: Stream button anchored below title */}
         <div className="mt-[36vw] md:mt-[16vw] flex flex-col items-start md:items-end md:text-right md:pr-11 z-50">
           <button
             onClick={() => setIsModalOpen(true)}
@@ -289,23 +290,26 @@ export default function Home() {
             <span className="text-red-600 font-bold text-lg">+</span>
           </button>
 
-          {/* desktop: am */}
+          {/* Desktop: Artist management text */}
           <p className="hidden md:block text-red-600 text-lg font-normal uppercase tracking-tight">
             ARTIST MANAGEMENT, ETC
           </p>
         </div>
       </div>
 
-      <div className="md:hidden absolute bottom-[160px] left-0 w-full px-3 pb-2 pointer-events-none z-[40] mb-[30vh] md:mb-0">
+      {/* Mobile: flex-1 spacer that pushes artist mgmt text to bottom of black area */}
+      <div className="flex-1 flex md:hidden flex-col justify-end pointer-events-none z-[40] px-3 pb-2">
         <p className="text-red-600 text-[10px] font-normal uppercase tracking-tight">
           ARTIST MANAGEMENT, ETC
         </p>
       </div>
 
-      <div className="flex-grow"></div>
+      {/* Desktop spacer */}
+      <div className="hidden md:block flex-grow"></div>
 
-      <div className="flex md:hidden flex-col w-full bg-[#EE83B5] p-4 pb-8 z-[10] relative pointer-events-auto border-t-2 border-red-600">
-        <div className="flex justify-between items-center w-full mb-4">
+      {/* Mobile footer */}
+      <div className="flex md:hidden flex-col w-full bg-[#EE83B5] p-4 z-[10] relative pointer-events-auto border-t-2 border-red-600">
+        <div className="flex justify-between items-center w-full mb-3">
           <p className="text-red-600 text-[10px] font-bold uppercase">Listen Here</p>
           <a href="mailto:info@kill-larry.com" className="text-red-600 text-[10px] font-normal uppercase underline">CONTACT</a>
         </div>
@@ -314,7 +318,7 @@ export default function Home() {
             <button
               key={num}
               onClick={() => setActiveStation(prev => (prev === num ? null : num))}
-              className={`w-full h-12 bg-black flex items-center justify-between px-4 border border-red-600 transition-all ${activeStation === num ? 'ring-2 ring-red-600' : ''}`}
+              className={`w-full h-11 bg-black flex items-center justify-between px-4 border border-red-600 transition-all ${activeStation === num ? 'ring-2 ring-red-600' : ''}`}
             >
               <span className="text-red-600 font-bold">{num}</span>
               <span className="text-red-600 font-normal uppercase text-[10px]">{stations[num].name}</span>
@@ -323,6 +327,7 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Desktop footer */}
       <div className="hidden md:flex w-full bg-[#EE83B5] border-b-[4px] border-red-600 pt-40 pb-4 px-10 z-[10] relative items-end pointer-events-auto">
         <div className="w-full flex flex-row items-end justify-between pb-0">
           <div className="flex flex-row items-end mb-0 gap-4 pb-1">
