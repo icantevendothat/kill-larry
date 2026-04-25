@@ -338,8 +338,6 @@ className={`h-full w-auto object-contain shadow-2xl transition-all duration-300 
 
 };
 
-
-
 export default function Home() {
 
 const [activeStation, setActiveStation] = useState<number | null>(null);
@@ -354,12 +352,9 @@ const audioRef = useRef<HTMLAudioElement | null>(null);
 
 
 
-const stations: Record<number, { name: string; url: string }> = {
-
-1: { name: "JASWIRY", url: "/audio/jaswiry.mp3" },
-
-2: { name: "HAWA", url: "/audio/hawa.mp3" }
-
+const stations: Record<number, { name: string; url: string; duration: number }> = {
+  1: { name: "JASWIRY", url: "/audio/jasradio.mp3", duration: 1478 },
+  2: { name: "HAWA", url: "/audio/hawaradio.mp3", duration: 2338 }
 };
 
 
@@ -383,21 +378,42 @@ left: `${Math.random() * 50 + 10}%`,
 
 
 useEffect(() => {
+  // Cleanup previous audio instance if it exists
+  if (audioRef.current) {
+    audioRef.current.pause();
+    audioRef.current = null;
+  }
 
-if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+  if (activeStation !== null) {
+    const station = stations[activeStation];
+    const audio = new Audio(station.url);
+    
+    // We use a fixed "Start Date" (Project Launch or Jan 1st) 
+    // to sync all users to the same timeline.
+    const referenceDate = new Date('2026-01-01T00:00:00Z').getTime() / 1000;
+    const now = Date.now() / 1000;
+    const secondsSinceStart = now - referenceDate;
+    
+    // The Modulo (%) operator finds the remainder, 
+    // telling us exactly where we are in the current loop.
+    const syncPosition = secondsSinceStart % station.duration;
 
-if (activeStation !== null) {
+    audio.currentTime = syncPosition;
+    audio.loop = true;
+    
+    // Play the synced stream
+    audio.play().catch((err) => {
+      console.error("Autoplay blocked. Most browsers require a click first.", err);
+    });
+    
+    audioRef.current = audio;
+  }
 
-audioRef.current = new Audio(stations[activeStation].url);
-
-audioRef.current.loop = true;
-
-audioRef.current.play().catch(() => {});
-
-}
-
-return () => audioRef.current?.pause();
-
+  return () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+  };
 }, [activeStation]);
 
 
