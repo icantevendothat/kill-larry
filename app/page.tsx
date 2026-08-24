@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 
-// --- Particle Component ---
 const Particle = ({ x, y, color }: { x: number; y: number; color: string }) => {
   const [pos, setPos] = useState({ x, y });
   const [isDead, setIsDead] = useState(false);
@@ -45,7 +44,6 @@ const Particle = ({ x, y, color }: { x: number; y: number; color: string }) => {
   );
 };
 
-// --- Larry Enemy Component ---
 const LarryTarget = () => {
   const [pos, setPos] = useState({ x: 50, y: 150 });
   const [isKilled, setIsKilled] = useState(false);
@@ -165,6 +163,36 @@ const FloatingImage = ({ id, delay, initialPos, src, startTimer }: { id: number;
   );
 };
 
+const ScrambledLetter = ({ targetLetter, isSpace }: { targetLetter: string; isSpace?: boolean }) => {
+  const [currentLetter, setCurrentLetter] = useState(targetLetter);
+
+  useEffect(() => {
+    if (isSpace) return;
+
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    
+    const interval = setInterval(() => {
+      setCurrentLetter(chars[Math.floor(Math.random() * chars.length)]);
+    }, 50);
+
+    const randomDelay = 800 + Math.random() * 2000;
+
+    const timeout = setTimeout(() => {
+      clearInterval(interval);
+      setCurrentLetter(targetLetter);
+    }, randomDelay);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, [targetLetter, isSpace]);
+
+  if (isSpace) return <span className="w-[10vw]"></span>;
+  return <span>{currentLetter}</span>;
+};
+
+
 export default function Home() {
   const [activeStation, setActiveStation] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -176,6 +204,19 @@ export default function Home() {
     1: { name: "JASWIRY", url: "/audio/jasradio.mp3", duration: 1478 },
     2: { name: "HAWA", url: "/audio/hawaradio.mp3", duration: 2338 }
   };
+
+  const titleConfig = [
+    { char: 'K', space: false },
+    { char: 'I', space: false },
+    { char: 'L', space: false },
+    { char: 'L', space: false },
+    { char: ' ', space: true },
+    { char: 'L', space: false },
+    { char: 'A', space: false },
+    { char: 'R', space: false },
+    { char: 'R', space: false },
+    { char: 'Y', space: false },
+  ];
 
   useEffect(() => {
     const imageNames = ['Screenshot 2026-01-30 at 11.01.03 PM 1.png', 'draft2 1.png', 'Screenshot 2026-01-30 at 11.21.41 PM 1.png', 'Screenshot 2026-01-30 at 11.24.15 PM 1 1.png', 'Screenshot 2026-01-30 at 11.25.07 PM 1.png', 'Screenshot 2026-01-30 at 11.25.20 PM 1.png', 'Screenshot 2026-01-30 at 11.26.55 PM 1.png', 'Screenshot 2026-01-30 at 11.30.17 PM 1.png', 'Screenshot 2026-01-30 at 11.31.09 PM 1.png'];    setScatteredImages(imageNames.map(name => ({
@@ -224,7 +265,6 @@ export default function Home() {
 
       <LarryTarget />
 
-      {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 pointer-events-auto">
           <div className="bg-[#EE83B5] border-2 border-red-600 p-6 md:p-8 max-w-md w-full relative">
@@ -262,7 +302,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Scattered gallery images */}
       {scatteredImages.map((img, index) => (
         <FloatingImage
           key={index}
@@ -274,10 +313,15 @@ export default function Home() {
         />
       ))}
 
-      {/* Title + mobile stream button */}
       <div className="w-full flex flex-col justify-start absolute top-0 left-0 z-[40] pointer-events-none px-2">
         <h1 className="w-full flex justify-between items-start text-[18vw] md:text-[19.5vw] leading-[0.5] uppercase transform scale-y-[3.5] md:scale-y-[4] origin-top select-none mt-[-1vw] md:mt-[-2vw]">
-          <span>K</span><span>I</span><span>L</span><span>L</span><span className="w-[10vw]"></span><span>L</span><span>A</span><span>R</span><span>R</span><span>Y</span>
+          {titleConfig.map((item, index) => (
+             <ScrambledLetter 
+               key={index} 
+               targetLetter={item.char} 
+               isSpace={item.space} 
+             />
+          ))}
         </h1>
 
         {/* Mobile: Stream button anchored below title */}
